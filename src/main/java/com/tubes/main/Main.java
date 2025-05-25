@@ -9,12 +9,11 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/tubes/main.fxml"));
-        Scene scene = new Scene(loader.load(), 800, 600); // Set ukuran window
-
+        Scene scene = new Scene(loader.load(), 720, 512); 
         stage.setScene(scene);
-        stage.setTitle("That's Not My Neighbor");
-        stage.setResizable(false); // Window tidak bisa di-resize
-        stage.centerOnScreen();    // Tampilkan di tengah layar
+        stage.setTitle("That's Not My Grrrz..");
+        stage.setResizable(false);
+        stage.centerOnScreen();
         stage.show();
     }
 

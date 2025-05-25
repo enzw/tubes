@@ -1,62 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Button?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.tubes.controller.GameController"
-            prefWidth="800" prefHeight="600"
-            style="-fx-background-image: url('/com/tubes/assets/background.png');
-                   -fx-background-repeat: no-repeat;
-                   -fx-background-position: center;
-                   -fx-background-size: cover;">
+<StackPane xmlns:fx="http://javafx.com/fxml"
+           fx:controller="com.tubes.controller.GameController"
+           fx:id="rootPane"
+           prefWidth="1280" prefHeight="720">
 
-    <top>
-        <Label text="That's Not My Neighbor"
-               style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;"
-               BorderPane.alignment="CENTER"/>
-    </top>
+    <!-- Background -->
+    <ImageView fx:id="backgroundImage" preserveRatio="false" />
 
-    <center>
-        <VBox spacing="20" alignment="CENTER">
-            <padding>
-                <Insets top="20.0" right="20.0" bottom="20.0" left="20.0"/>
-            </padding>
+    <!-- Character di tengah bawah -->
+    <ImageView fx:id="characterImage" preserveRatio="true" StackPane.alignment="BOTTOM_CENTER"/>
 
-            <StackPane alignment="CENTER">
-                <ImageView fx:id="characterImage"
-                           fitWidth="200"
-                           fitHeight="200"
-                           preserveRatio="true"
-                           smooth="true"/>
-            </StackPane>
+    <!-- Counter -->
+    <ImageView fx:id="counterImage" preserveRatio="false" StackPane.alignment="BOTTOM_CENTER" />
 
-            <Label fx:id="characterName"
-                   style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+    <!-- Dialog box muncul di bawah layar -->
+    <HBox fx:id="dialogBox" spacing="10" style="-fx-background-color: rgba(0,0,0,0.7);" 
+        StackPane.alignment="BOTTOM_CENTER" visible="false" managed="false">
+        <padding>
+            <Insets top="10" right="10" bottom="10" left="10"/>
+        </padding>
+        <ImageView fx:id="dialogCharacterImage" fitWidth="50" fitHeight="50" preserveRatio="true"/>
+        <Label fx:id="dialogLabel" style="-fx-text-fill: white; -fx-font-size: 14px;" />
+        <Button text="Close" onAction="#closeDialog" />
+    </HBox>
 
-            <Label fx:id="characterDescription"
-                   wrapText="true"
-                   maxWidth="300"
-                   style="-fx-text-fill: white;"/>
+    <HBox fx:id="dialogBox" alignment="CENTER_LEFT" spacing="10" visible="false" managed="false">
+        <ImageView fx:id="dialogCharacterImage" />
+        <Label fx:id="dialogLabel" style="-fx-font-size: 12px;" />
+        <Button fx:id="nextButton" text="Next" onAction="#nextCharacter" />
+    </HBox>
 
-            <HBox spacing="20" alignment="CENTER">
-                <Button text="Human" onAction="#handleHumanButton"/>
-                <Button text="Doppel" onAction="#handleDoppelButton"/>
-            </HBox>
-        </VBox>
-    </center>
-
-    <bottom>
-        <Label fx:id="scoreLabel"
-               text="Score: 0"
-               style="-fx-font-size: 16px; -fx-text-fill: white;"
-               BorderPane.alignment="CENTER">
-            <padding>
-                <Insets top="10" right="10" bottom="10" left="10"/>
-            </padding>
-        </Label>
-    </bottom>
-
-</BorderPane>
+</StackPane>
