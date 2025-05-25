@@ -10,10 +10,13 @@
             prefWidth="800" prefHeight="600"
             style="-fx-background-image: url('/com/tubes/assets/background.png');
                    -fx-background-repeat: no-repeat;
-                   -fx-background-position: center;">
+                   -fx-background-position: center;
+                   -fx-background-size: cover;">
 
     <top>
-        <Label text="That's Not My Neighbor" style="-fx-font-size: 24px;" BorderPane.alignment="CENTER"/>
+        <Label text="That's Not My Neighbor"
+               style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;"
+               BorderPane.alignment="CENTER"/>
     </top>
 
     <center>
@@ -22,9 +25,21 @@
                 <Insets top="20.0" right="20.0" bottom="20.0" left="20.0"/>
             </padding>
 
-            <ImageView fx:id="characterImage" fitWidth="200" fitHeight="200"/>
-            <Label fx:id="characterName" style="-fx-font-size: 16px;"/>
-            <Label fx:id="characterDescription" wrapText="true" maxWidth="300"/>
+            <StackPane alignment="CENTER">
+                <ImageView fx:id="characterImage"
+                           fitWidth="200"
+                           fitHeight="200"
+                           preserveRatio="true"
+                           smooth="true"/>
+            </StackPane>
+
+            <Label fx:id="characterName"
+                   style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+
+            <Label fx:id="characterDescription"
+                   wrapText="true"
+                   maxWidth="300"
+                   style="-fx-text-fill: white;"/>
 
             <HBox spacing="20" alignment="CENTER">
                 <Button text="Human" onAction="#handleHumanButton"/>
@@ -34,7 +49,10 @@
     </center>
 
     <bottom>
-        <Label fx:id="scoreLabel" text="Score: 0" BorderPane.alignment="CENTER">
+        <Label fx:id="scoreLabel"
+               text="Score: 0"
+               style="-fx-font-size: 16px; -fx-text-fill: white;"
+               BorderPane.alignment="CENTER">
             <padding>
                 <Insets top="10" right="10" bottom="10" left="10"/>
             </padding>
