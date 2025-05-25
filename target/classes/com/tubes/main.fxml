@@ -21,10 +21,32 @@
     <!-- Counter -->
     <ImageView fx:id="counterImage" preserveRatio="false" StackPane.alignment="BOTTOM_CENTER" />
 
-    <HBox fx:id="dialogBox" alignment="CENTER_LEFT" spacing="10" visible="false" managed="false">
-        <ImageView fx:id="dialogCharacterImage" />
-        <Label fx:id="dialogLabel" style="-fx-font-size: 12px;" />
-        <Button fx:id="nextButton" text="Next" onAction="#nextCharacter" />
-    </HBox>
+    <!-- Dialog Box -->
+<HBox fx:id="dialogBox"
+      spacing="10"
+      alignment="BOTTOM_LEFT"
+      visible="false"
+      managed="false"
+      StackPane.alignment="BOTTOM_LEFT">
+    
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <Label fx:id="characterDescription"
+           prefWidth="240"
+           wrapText="true"
+           style="-fx-background-color: rgba(0,0,0,0.6);
+                  -fx-text-fill: white;
+                  -fx-padding: 10;
+                  -fx-font-size: 14px;
+                  -fx-background-radius: 8;" />
+
+    <Button fx:id="nextButton"
+            text="Next"
+            onAction="#nextCharacter"
+            style="-fx-font-size: 14px;" />
+</HBox>
+
 
 </StackPane>

@@ -10,6 +10,7 @@ import com.tubes.model.CharacterFactory;
 import javafx.animation.TranslateTransition;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -32,7 +33,6 @@ public class GameController {
     private Random random = new Random();
 
     public void initialize() {
-        // Load gambar background dan counter
         backgroundImage.setImage(new Image(getClass().getResourceAsStream("/com/tubes/assets/background.png")));
         counterImage.setImage(new Image(getClass().getResourceAsStream("/com/tubes/assets/counter.png")));
 
@@ -42,12 +42,11 @@ public class GameController {
         counterImage.fitWidthProperty().bind(rootPane.widthProperty());
         counterImage.fitHeightProperty().bind(rootPane.heightProperty());
 
-        // Isi data karakter: {name, description, ttm}
-        characterData.add(new String[]{"Saskia", "Saskia adalah karakter cerdas dan ceria", "Bandung, 1 Januari 2020"});
-        characterData.add(new String[]{"Abby", "Abby suka berpetualang dan pemberani", "Surabaya, 5 Mei 2019"});
-        characterData.add(new String[]{"Wiwok", "Wiwok penuh semangat dan ceria", "Jakarta, 17 Agustus 2045"});
-        characterData.add(new String[]{"Jhon", "Jhon adalah pemikir yang tenang", "Medan, 12 Desember 2018"});
-        characterData.add(new String[]{"Timmy", "Timmy lucu dan suka bercanda", "Yogyakarta, 3 Maret 2021"});
+        characterData.add(new String[]{"Saskia", "Nama : Saskia Paramether\nNo. Apart : 105-A", "1"});
+        characterData.add(new String[]{"Abby", "Nama : Bob Abby\nNo. Apart : 666-F", "3"});
+        characterData.add(new String[]{"Wiwok", "Nama : Wiwok Detok\nNo. Apart : 501-O", "2"});
+        characterData.add(new String[]{"Jhon", "Nama : Jhon Walker\nNo. Apart : 122-I", "1"});
+        characterData.add(new String[]{"Timmy", "Nama : Timmy Tummy\nNo. Apart : 431-A", "2"});
 
         loadCurrentCharacter();
 
@@ -68,13 +67,22 @@ public class GameController {
     private void loadCurrentCharacter() {
         String[] data = characterData.get(currentIndex);
         String name = data[0];
-        String description = data[1];
-        String ttm = data[2];
+        String baseDescription = data[1];
+        String lantai = data[2];
 
         // Random pilih "zombie" atau "human"
         String type = random.nextBoolean() ? "zombie" : "human";
 
-        currentCharacter = CharacterFactory.createCharacter(type, name, description, ttm);
+        // Deskripsi khusus sesuai tipe
+        String finalDescription;
+        if ("human".equals(type)) {
+            finalDescription = baseDescription;
+        } else {
+            finalDescription = baseDescription.replace("Nama", "Subjek")
+                                              .replace("No. Apart", "Lokasi Terakhir");
+        }
+
+        currentCharacter = CharacterFactory.createCharacter(type, name, finalDescription, lantai);
 
         // Tentukan path gambar
         String imagePath;
@@ -109,12 +117,14 @@ public class GameController {
     private void playExitAnimation(Runnable afterExit) {
         TranslateTransition exit = new TranslateTransition(Duration.seconds(1), characterImage);
         exit.setFromX(0);
-        exit.setToX(rootPane.getWidth()); // Keluar ke kanan
+        exit.setToX(rootPane.getWidth());
 
         exit.setOnFinished(e -> afterExit.run());
 
         exit.play();
     }
+
+    @FXML private Label characterDescription;
 
     @FXML
     private void nextCharacter() {
@@ -128,6 +138,7 @@ public class GameController {
             }
 
             loadCurrentCharacter();
+            characterDescription.setText(currentCharacter.getDescription());
             startCharacterEntranceAnimation();
         });
     }
