@@ -26,6 +26,7 @@ public class GameController {
 
     @FXML private HBox dialogBox;
     @FXML private Button nextButton;
+    @FXML private Label characterDescription;
 
     private List<String[]> characterData = new ArrayList<>();
     private int currentIndex = 0;
@@ -68,35 +69,52 @@ public class GameController {
         String[] data = characterData.get(currentIndex);
         String name = data[0];
         String baseDescription = data[1];
-        String lantai = data[2];
+        String originalLantai = data[2];
 
         // Random pilih "zombie" atau "human"
         String type = random.nextBoolean() ? "zombie" : "human";
 
-        // Deskripsi khusus sesuai tipe
-        String finalDescription;
+        // Jika human, kemungkinan lantai salah (acak selain lantai asli)
+        String lantai;
         if ("human".equals(type)) {
-            finalDescription = baseDescription;
+            List<String> allLantai = new ArrayList<>();
+            for (String[] d : characterData) {
+                if (!allLantai.contains(d[2])) {
+                    allLantai.add(d[2]);
+                }
+            }
+            allLantai.remove(originalLantai);
+            if (allLantai.size() > 0) {
+                lantai = allLantai.get(random.nextInt(allLantai.size()));
+            } else {
+                lantai = originalLantai;
+            }
         } else {
-            finalDescription = baseDescription.replace("Nama", "Subjek")
-                                              .replace("No. Apart", "Lokasi Terakhir");
+            lantai = originalLantai;
         }
 
-        currentCharacter = CharacterFactory.createCharacter(type, name, finalDescription, lantai);
+        // Nama human diberi tanda "(Human)"
+        String finalName = type.equals("human") ? name + " (Human)" : name;
 
-        // Tentukan path gambar
+        // Deskripsi tetap sama tanpa perubahan
+        String finalDescription = baseDescription;
+
+        currentCharacter = CharacterFactory.createCharacter(type, finalName, finalDescription, lantai);
+
+        // Path gambar sesuai tipe
         String imagePath;
         if ("human".equals(type)) {
-            imagePath = "/com/tubes/assets/dopple" + name + ".png";  // contoh: doppleSaskia.png
+            imagePath = "/com/tubes/assets/dopple" + name + ".png";
         } else {
-            imagePath = "/com/tubes/assets/" + name + ".png";        // contoh: Saskia.png
+            imagePath = "/com/tubes/assets/" + name + ".png";
         }
 
-        // Set gambar besar
         characterImage.setImage(new Image(getClass().getResourceAsStream(imagePath)));
         characterImage.setFitWidth(400);
         characterImage.setFitHeight(400);
         characterImage.setPreserveRatio(true);
+
+        characterDescription.setText(finalDescription);
     }
 
     private void startCharacterEntranceAnimation() {
@@ -124,8 +142,6 @@ public class GameController {
         exit.play();
     }
 
-    @FXML private Label characterDescription;
-
     @FXML
     private void nextCharacter() {
         dialogBox.setVisible(false);
@@ -138,7 +154,6 @@ public class GameController {
             }
 
             loadCurrentCharacter();
-            characterDescription.setText(currentCharacter.getDescription());
             startCharacterEntranceAnimation();
         });
     }
