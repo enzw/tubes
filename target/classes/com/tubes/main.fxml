@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.tubes.controller.GameController"
+            prefWidth="800" prefHeight="600"
+            style="-fx-background-image: url('/com/tubes/assets/background.png');
+                   -fx-background-repeat: no-repeat;
+                   -fx-background-position: center;">
+
+    <top>
+        <Label text="That's Not My Neighbor" style="-fx-font-size: 24px;" BorderPane.alignment="CENTER"/>
+    </top>
+
+    <center>
+        <VBox spacing="20" alignment="CENTER">
+            <padding>
+                <Insets top="20.0" right="20.0" bottom="20.0" left="20.0"/>
+            </padding>
+
+            <ImageView fx:id="characterImage" fitWidth="200" fitHeight="200"/>
+            <Label fx:id="characterName" style="-fx-font-size: 16px;"/>
+            <Label fx:id="characterDescription" wrapText="true" maxWidth="300"/>
+
+            <HBox spacing="20" alignment="CENTER">
+                <Button text="Human" onAction="#handleHumanButton"/>
+                <Button text="Doppel" onAction="#handleDoppelButton"/>
+            </HBox>
+        </VBox>
+    </center>
+
+    <bottom>
+        <Label fx:id="scoreLabel" text="Score: 0" BorderPane.alignment="CENTER">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+        </Label>
+    </bottom>
+
+</BorderPane>
