@@ -21,17 +21,6 @@
     <!-- Counter -->
     <ImageView fx:id="counterImage" preserveRatio="false" StackPane.alignment="BOTTOM_CENTER" />
 
-    <!-- Dialog box muncul di bawah layar -->
-    <HBox fx:id="dialogBox" spacing="10" style="-fx-background-color: rgba(0,0,0,0.7);" 
-        StackPane.alignment="BOTTOM_CENTER" visible="false" managed="false">
-        <padding>
-            <Insets top="10" right="10" bottom="10" left="10"/>
-        </padding>
-        <ImageView fx:id="dialogCharacterImage" fitWidth="50" fitHeight="50" preserveRatio="true"/>
-        <Label fx:id="dialogLabel" style="-fx-text-fill: white; -fx-font-size: 14px;" />
-        <Button text="Close" onAction="#closeDialog" />
-    </HBox>
-
     <HBox fx:id="dialogBox" alignment="CENTER_LEFT" spacing="10" visible="false" managed="false">
         <ImageView fx:id="dialogCharacterImage" />
         <Label fx:id="dialogLabel" style="-fx-font-size: 12px;" />

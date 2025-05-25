@@ -2,14 +2,14 @@ package com.tubes.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import com.tubes.model.Character;
-import com.tubes.model.HumanCharacter;
+import com.tubes.model.CharacterFactory;
 
 import javafx.animation.TranslateTransition;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -24,14 +24,12 @@ public class GameController {
     @FXML private ImageView counterImage;
 
     @FXML private HBox dialogBox;
-    @FXML private Label dialogLabel;
-    @FXML private ImageView dialogCharacterImage;
+    @FXML private Button nextButton;
 
-    @FXML private Button nextButton;  // Tombol next karakter
-
-    private List<Character> characters = new ArrayList<>();
+    private List<String[]> characterData = new ArrayList<>();
     private int currentIndex = 0;
     private Character currentCharacter;
+    private Random random = new Random();
 
     public void initialize() {
         // Load gambar background dan counter
@@ -44,20 +42,18 @@ public class GameController {
         counterImage.fitWidthProperty().bind(rootPane.widthProperty());
         counterImage.fitHeightProperty().bind(rootPane.heightProperty());
 
-        // Buat 5 karakter (HumanCharacter contoh)
-        characters.add(new HumanCharacter("Saskia", "Saskia adalah karakter cerdas dan ceria", "Bandung, 1 Januari 2020"));
-        characters.add(new HumanCharacter("Abby", "Abby suka berpetualang dan pemberani", "Surabaya, 5 Mei 2019"));
-        characters.add(new HumanCharacter("Wiwok", "Wiwok penuh semangat dan ceria", "Jakarta, 17 Agustus 2045"));
-        characters.add(new HumanCharacter("Jhon", "Jhon adalah pemikir yang tenang", "Medan, 12 Desember 2018"));
-        characters.add(new HumanCharacter("Timmy", "Timmy lucu dan suka bercanda", "Yogyakarta, 3 Maret 2021"));
+        // Isi data karakter: {name, description, ttm}
+        characterData.add(new String[]{"Saskia", "Saskia adalah karakter cerdas dan ceria", "Bandung, 1 Januari 2020"});
+        characterData.add(new String[]{"Abby", "Abby suka berpetualang dan pemberani", "Surabaya, 5 Mei 2019"});
+        characterData.add(new String[]{"Wiwok", "Wiwok penuh semangat dan ceria", "Jakarta, 17 Agustus 2045"});
+        characterData.add(new String[]{"Jhon", "Jhon adalah pemikir yang tenang", "Medan, 12 Desember 2018"});
+        characterData.add(new String[]{"Timmy", "Timmy lucu dan suka bercanda", "Yogyakarta, 3 Maret 2021"});
 
         loadCurrentCharacter();
 
-        // Hide dialog awalnya
         dialogBox.setVisible(false);
         dialogBox.setManaged(false);
 
-        // Setup listener agar animasi mulai saat scene siap
         rootPane.sceneProperty().addListener((obsScene, oldScene, newScene) -> {
             if (newScene != null) {
                 newScene.windowProperty().addListener((obsWin, oldWin, newWin) -> {
@@ -70,46 +66,54 @@ public class GameController {
     }
 
     private void loadCurrentCharacter() {
-        currentCharacter = characters.get(currentIndex);
+        String[] data = characterData.get(currentIndex);
+        String name = data[0];
+        String description = data[1];
+        String ttm = data[2];
 
-        String imagePath = "/com/tubes/assets/" + currentCharacter.getName() + ".png";
+        // Random pilih "zombie" atau "human"
+        String type = random.nextBoolean() ? "zombie" : "human";
 
-        // Update gambar karakter besar
+        currentCharacter = CharacterFactory.createCharacter(type, name, description, ttm);
+
+        // Tentukan path gambar
+        String imagePath;
+        if ("human".equals(type)) {
+            imagePath = "/com/tubes/assets/dopple" + name + ".png";  // contoh: doppleSaskia.png
+        } else {
+            imagePath = "/com/tubes/assets/" + name + ".png";        // contoh: Saskia.png
+        }
+
+        // Set gambar besar
         characterImage.setImage(new Image(getClass().getResourceAsStream(imagePath)));
         characterImage.setFitWidth(400);
         characterImage.setFitHeight(400);
         characterImage.setPreserveRatio(true);
-
-        // Update gambar kecil di dialog
-        dialogCharacterImage.setImage(new Image(getClass().getResourceAsStream(imagePath)));
-        dialogCharacterImage.setFitWidth(50);
-        dialogCharacterImage.setFitHeight(50);
-        dialogCharacterImage.setPreserveRatio(true);
     }
 
     private void startCharacterEntranceAnimation() {
-        // Start posisi di luar layar kanan
-        characterImage.setTranslateX(rootPane.getWidth());
+        characterImage.setTranslateX(-rootPane.getWidth());
 
-        TranslateTransition tt = new TranslateTransition(Duration.seconds(3), characterImage);
-        tt.setFromX(rootPane.getWidth());
+        TranslateTransition tt = new TranslateTransition(Duration.seconds(1.5), characterImage);
+        tt.setFromX(-rootPane.getWidth());
         tt.setToX(0);
 
         tt.setOnFinished(e -> {
-            showDialogTtm();
+            dialogBox.setVisible(true);
+            dialogBox.setManaged(true);
         });
 
         tt.play();
     }
 
-    private void showDialogTtm() {
-        dialogLabel.setText(
-            currentCharacter.getName() + "\n" +
-            currentCharacter.getDescription() + "\n" +
-            "TTM: " + currentCharacter.getTtm()
-        );
-        dialogBox.setVisible(true);
-        dialogBox.setManaged(true);
+    private void playExitAnimation(Runnable afterExit) {
+        TranslateTransition exit = new TranslateTransition(Duration.seconds(1), characterImage);
+        exit.setFromX(0);
+        exit.setToX(rootPane.getWidth()); // Keluar ke kanan
+
+        exit.setOnFinished(e -> afterExit.run());
+
+        exit.play();
     }
 
     @FXML
@@ -117,18 +121,14 @@ public class GameController {
         dialogBox.setVisible(false);
         dialogBox.setManaged(false);
 
-        currentIndex++;
-        if (currentIndex >= characters.size()) {
-            currentIndex = 0;  // Loop ke karakter pertama
-        }
+        playExitAnimation(() -> {
+            currentIndex++;
+            if (currentIndex >= characterData.size()) {
+                currentIndex = 0;
+            }
 
-        loadCurrentCharacter();
-        startCharacterEntranceAnimation();
-    }
-
-    @FXML
-    private void closeDialog() {
-        dialogBox.setVisible(false);
-        dialogBox.setManaged(false);
+            loadCurrentCharacter();
+            startCharacterEntranceAnimation();
+        });
     }
 }
