@@ -48,7 +48,6 @@ public class GameController {
     );
 
     private String currentCharacterType = "";
-
     private String trueLantai = "";
 
     public void initialize() {
@@ -89,7 +88,6 @@ public class GameController {
         String baseDescription = data[1];
         String originalLantai = data[2];
 
-        // Random type assignment
         String type = random.nextBoolean() ? "zombie" : "human";
         trueLantai = originalLantai;
         currentCharacterType = type;
@@ -106,14 +104,12 @@ public class GameController {
             }
         }
 
-        // Ambiguous alias
         String alias = name;
         if (random.nextBoolean()) {
             List<String> aliases = nameAliases.getOrDefault(name, List.of(name));
             alias = aliases.get(random.nextInt(aliases.size()));
         }
 
-        // Ambiguous speech style
         String[] greetings = {
             "Halo, saya " + alias,
             "Hmm... saya rasa nama saya " + alias,
@@ -135,22 +131,41 @@ public class GameController {
 
         String noApartemen = baseDescription.split("No\\. Apart ?: ")[1];
 
-        String finalDescription = '"' + greeting + "\n" +
-                                  "Nomor apartemenku " + noApartemen + "\n" +
-                                  hint + '"';
+        String finalDescription = "Zombie :\n" + '"' +
+        greeting + "\n" +
+        "Nomor apartemen saya " + noApartemen + "\n" +
+        hint;
+
+        boolean imageMismatch = false;
+        String imagePath;
+
+        if ("human".equals(type)) {
+            boolean useZombieImage = random.nextInt(100) < 70;
+            if (useZombieImage) {
+                imagePath = "/com/tubes/assets/" + name + ".png";
+                imageMismatch = true;
+            } else {
+                imagePath = "/com/tubes/assets/dopple" + name + ".png";
+                imageMismatch = false;
+            }
+        } else {
+            imagePath = "/com/tubes/assets/" + name + ".png";
+        }
+
+        if ("human".equals(type) && imageMismatch) {
+            List<String> excuses = List.of(
+                "Maaf, aku habis oplas.",
+                "Kamera beda, orangnya sama.",
+                "Eh, itu foto lama banget.",
+                "Lagi breakout jerawat, jangan nilai dari wajah ya.",
+                "Aku baru pulang dari salon alien."
+            );
+            finalDescription += "\n" + excuses.get(random.nextInt(excuses.size()));
+        }
+
+        finalDescription += '"';
 
         currentCharacter = CharacterFactory.createCharacter(type, alias, finalDescription, fakeLantai);
-
-        // Ambiguous image logic
-        String imagePath;
-        int r = random.nextInt(100);
-        if (r < 40) {
-            imagePath = "/com/tubes/assets/" + name + ".png"; // bisa benar
-        } else if (r < 80) {
-            imagePath = "/com/tubes/assets/dopple" + name + ".png"; // bisa menyamar
-        } else {
-            imagePath = "/com/tubes/assets/" + name + ".png"; // kembali ke asli
-        }
 
         characterImage.setImage(new Image(getClass().getResourceAsStream(imagePath)));
         characterImage.setFitWidth(400);
@@ -162,7 +177,6 @@ public class GameController {
 
     private void startCharacterEntranceAnimation() {
         characterImage.setTranslateX(-rootPane.getWidth());
-
         TranslateTransition tt = new TranslateTransition(Duration.seconds(1.5), characterImage);
         tt.setFromX(-rootPane.getWidth());
         tt.setToX(0);
@@ -195,27 +209,24 @@ public class GameController {
     @FXML
     private void showIdCard() {
         idCardImage.setImage(new Image(getClass().getResourceAsStream("/com/tubes/assets/idCard.png")));
-
         String[] data = characterData.get(currentIndex);
         String originalName = data[0];
         String baseDescription = data[1];
         String originalLantai = data[2];
 
-        // Ambil data langsung dari string deskripsi asli
         String nama = baseDescription.split("Nama ?: ")[1].split("\n")[0].trim();
         String noApart = baseDescription.split("No\\. Apart ?: ")[1].trim();
 
         idCardCharacterImage.setImage(new Image(getClass().getResourceAsStream("/com/tubes/assets/" + originalName + ".png")));
 
         String finalDesc = "Nama   : " + nama + "\n" +
-                        "No. Apart : " + noApart + "\n" +
-                        "Lantai : " + originalLantai;
+                           "No. Apart : " + noApart + "\n" +
+                           "Lantai : " + originalLantai;
 
         idCardCharacterDesc.setText(finalDesc);
         idCardPane.setVisible(true);
         idCardPane.setManaged(true);
     }
-
 
     @FXML
     private void closeIdCard() {
