@@ -120,10 +120,18 @@ public class GameController {
 
         currentCharacter = CharacterFactory.createCharacter(type, finalName, finalDescription, lantai);
 
-        // Gambar karakter
-        String imagePath = "human".equals(type)
-            ? "/com/tubes/assets/dopple" + name + ".png"
-            : "/com/tubes/assets/" + name + ".png";
+        // Peluang 30% human pakai gambar zombie asli
+        String imagePath;
+        if ("human".equals(type)) {
+            boolean useZombieImage = random.nextInt(100) < 70;  // 30% chance
+            if (useZombieImage) {
+                imagePath = "/com/tubes/assets/" + name + ".png";  // gambar asli zombie
+            } else {
+                imagePath = "/com/tubes/assets/dopple" + name + ".png";  // gambar dopple alias
+            }
+        } else {
+            imagePath = "/com/tubes/assets/" + name + ".png";  // zombie selalu gambar asli
+        }
 
         characterImage.setImage(new Image(getClass().getResourceAsStream(imagePath)));
         characterImage.setFitWidth(400);
@@ -132,6 +140,7 @@ public class GameController {
 
         characterDescription.setText(finalDescription);
     }
+
 
     private void startCharacterEntranceAnimation() {
         characterImage.setTranslateX(-rootPane.getWidth());
@@ -171,7 +180,12 @@ public class GameController {
     @FXML
     private void showIdCard() {
         idCardImage.setImage(new Image(getClass().getResourceAsStream("/com/tubes/assets/idCard.png")));
-        idCardCharacterImage.setImage(characterImage.getImage());
+
+        // Ambil nama asli dari data
+        String originalName = characterData.get(currentIndex)[0];
+        String path = "/com/tubes/assets/" + originalName + ".png";
+
+        idCardCharacterImage.setImage(new Image(getClass().getResourceAsStream(path)));
         idCardPane.setVisible(true);
         idCardPane.setManaged(true);
     }
