@@ -3,9 +3,11 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.shape.Rectangle?>
 
 <StackPane xmlns:fx="http://javafx.com/fxml"
            fx:controller="com.tubes.controller.GameController"
@@ -22,31 +24,69 @@
     <ImageView fx:id="counterImage" preserveRatio="false" StackPane.alignment="BOTTOM_CENTER" />
 
     <!-- Dialog Box -->
-<HBox fx:id="dialogBox"
-      spacing="10"
-      alignment="BOTTOM_LEFT"
-      visible="false"
-      managed="false"
-      StackPane.alignment="BOTTOM_LEFT">
-    
-    <padding>
-        <Insets top="20" right="20" bottom="20" left="20"/>
-    </padding>
+    <HBox fx:id="dialogBox"
+          spacing="10"
+          alignment="BOTTOM_LEFT"
+          visible="false"
+          managed="false"
+          StackPane.alignment="BOTTOM_LEFT">
 
-    <Label fx:id="characterDescription"
-           prefWidth="240"
-           wrapText="true"
-           style="-fx-background-color: rgba(0,0,0,0.6);
-                  -fx-text-fill: white;
-                  -fx-padding: 10;
-                  -fx-font-size: 14px;
-                  -fx-background-radius: 8;" />
+        <padding>
+            <Insets top="20" right="20" bottom="20" left="20"/>
+        </padding>
 
-    <Button fx:id="nextButton"
-            text="Next"
-            onAction="#nextCharacter"
-            style="-fx-font-size: 14px;" />
-</HBox>
+        <Label fx:id="characterDescription"
+               prefWidth="240"
+               wrapText="true"
+               style="-fx-background-color: rgba(0,0,0,0.6);
+                      -fx-text-fill: white;
+                      -fx-padding: 10;
+                      -fx-font-size: 14px;
+                      -fx-background-radius: 8;" />
 
+        <Button fx:id="nextButton"
+                text="Next"
+                onAction="#nextCharacter"
+                style="-fx-font-size: 14px;" />
+
+        <Button text="Show ID Card"
+                onAction="#showIdCard"
+                style="-fx-font-size: 14px;" />
+    </HBox>
+
+<!-- ... bagian atas sama seperti sebelumnya ... -->
+
+<!-- ID Card Pop-up -->
+<StackPane fx:id="idCardPane"
+           visible="false"
+           managed="false"
+           StackPane.alignment="CENTER"
+           style="-fx-background-color: rgba(0,0,0,0.6);">
+
+    <VBox spacing="10" alignment="CENTER" style="-fx-padding: 20; -fx-background-radius: 10;">
+
+        <!-- StackPane untuk menumpuk gambar -->
+        <StackPane prefWidth="300" prefHeight="200">
+
+            <!-- idCardImage sebagai background -->
+            <ImageView fx:id="idCardImage" fitWidth="300" preserveRatio="true" />
+
+            <!-- idCardCharacterImage overlay, agak ke kiri dan bawah -->
+            <ImageView fx:id="idCardCharacterImage" fitHeight="140" preserveRatio="true"
+                       StackPane.alignment="CENTER"
+                       translateX="-90"
+                       translateY="40">
+                <clip>
+                    <Rectangle width="140" height="100" />
+                </clip>
+            </ImageView>
+
+        </StackPane>
+
+        <Button text="Tutup"
+                onAction="#closeIdCard"
+                style="-fx-font-size: 14px;" />
+    </VBox>
+</StackPane>
 
 </StackPane>

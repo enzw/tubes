@@ -1,7 +1,9 @@
 package com.tubes.controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import com.tubes.model.Character;
@@ -28,7 +30,12 @@ public class GameController {
     @FXML private Button nextButton;
     @FXML private Label characterDescription;
 
+    @FXML private StackPane idCardPane;
+    @FXML private ImageView idCardImage;
+    @FXML private ImageView idCardCharacterImage;
+
     private List<String[]> characterData = new ArrayList<>();
+    private Map<String, List<String>> nameAliases = new HashMap<>();
     private int currentIndex = 0;
     private Character currentCharacter;
     private Random random = new Random();
@@ -43,11 +50,22 @@ public class GameController {
         counterImage.fitWidthProperty().bind(rootPane.widthProperty());
         counterImage.fitHeightProperty().bind(rootPane.heightProperty());
 
+        // Data karakter: {Nama dasar, Deskripsi dasar, Lantai asli}
         characterData.add(new String[]{"Saskia", "Nama : Saskia Paramether\nNo. Apart : 105-A", "1"});
         characterData.add(new String[]{"Abby", "Nama : Bob Abby\nNo. Apart : 666-F", "3"});
         characterData.add(new String[]{"Wiwok", "Nama : Wiwok Detok\nNo. Apart : 501-O", "2"});
         characterData.add(new String[]{"Jhon", "Nama : Jhon Walker\nNo. Apart : 122-I", "1"});
         characterData.add(new String[]{"Timmy", "Nama : Timmy Tummy\nNo. Apart : 431-A", "2"});
+
+        // Alias nama untuk karakter human
+        nameAliases.put("Saskia", List.of("Sasky", "Saskia P.", "Saskia Paramita", "Sassy"));
+        nameAliases.put("Abby", List.of("Abigail", "Bobby Abby", "A.B.", "Ab"));
+        nameAliases.put("Wiwok", List.of("Wiwoko", "Wiw", "Wiwow", "Wiw Detok"));
+        nameAliases.put("Jhon", List.of("Jhonny", "J. Walker", "Jhon W.", "Jhan"));
+        nameAliases.put("Timmy", List.of("Tim", "T. Tummy", "Timmothy", "Timo"));
+
+        // Pilih karakter awal secara acak
+        currentIndex = random.nextInt(characterData.size());
 
         loadCurrentCharacter();
 
@@ -71,10 +89,8 @@ public class GameController {
         String baseDescription = data[1];
         String originalLantai = data[2];
 
-        // Random pilih "zombie" atau "human"
         String type = random.nextBoolean() ? "zombie" : "human";
 
-        // Jika human, kemungkinan lantai salah (acak selain lantai asli)
         String lantai;
         if ("human".equals(type)) {
             List<String> allLantai = new ArrayList<>();
@@ -84,24 +100,33 @@ public class GameController {
                 }
             }
             allLantai.remove(originalLantai);
-            if (allLantai.size() > 0) {
-                lantai = allLantai.get(random.nextInt(allLantai.size()));
-            } else {
-                lantai = originalLantai;
-            }
+            lantai = allLantai.isEmpty() ? originalLantai : allLantai.get(random.nextInt(allLantai.size()));
         } else {
             lantai = originalLantai;
         }
 
-        // Nama human diberi tanda "(Human)"
-        String finalName = type.equals("human") ? name + " (Human)" : name;
+        // Ambil alias nama jika human
+        String finalName;
+        if ("human".equals(type)) {
+            if (random.nextBoolean()) {
+                // Kadang pakai nama asli
+                finalName = name + " (Human)";
+            } else {
+                // Kadang pakai alias
+                List<String> aliases = nameAliases.getOrDefault(name, List.of(name));
+                String alias = aliases.get(random.nextInt(aliases.size()));
+                finalName = alias + " (Human)";
+            }
+        } else {
+            finalName = name;
+        }
 
-        // Deskripsi tetap sama tanpa perubahan
-        String finalDescription = baseDescription;
+
+        String finalDescription = "==ID CARD==\n" + baseDescription + "\nLantai : " + lantai;
 
         currentCharacter = CharacterFactory.createCharacter(type, finalName, finalDescription, lantai);
 
-        // Path gambar sesuai tipe
+        // Pilih path gambar
         String imagePath;
         if ("human".equals(type)) {
             imagePath = "/com/tubes/assets/dopple" + name + ".png";
@@ -156,5 +181,20 @@ public class GameController {
             loadCurrentCharacter();
             startCharacterEntranceAnimation();
         });
+    }
+
+    @FXML
+    private void showIdCard() {
+        idCardImage.setImage(new Image(getClass().getResourceAsStream("/com/tubes/assets/idCard.png")));
+        idCardCharacterImage.setImage(characterImage.getImage());
+
+        idCardPane.setVisible(true);
+        idCardPane.setManaged(true);
+    }
+
+    @FXML
+    private void closeIdCard() {
+        idCardPane.setVisible(false);
+        idCardPane.setManaged(false);
     }
 }
