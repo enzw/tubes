@@ -32,6 +32,7 @@ public class GameController {
     @FXML private StackPane idCardPane;
     @FXML private ImageView idCardImage;
     @FXML private ImageView idCardCharacterImage;
+    @FXML private Label idCardCharacterDesc; // <- Tambahan deskripsi di ID Card
 
     private List<String[]> characterData = new ArrayList<>();
     private int currentIndex = 0;
@@ -46,6 +47,9 @@ public class GameController {
         "Jhon", List.of("Jimmy", "Joko"),
         "Timmy", List.of("Toni", "Tatang")
     );
+
+    // Variabel untuk menyimpan lantai asli dari karakter
+    private String trueLantai = "";
 
     public void initialize() {
         backgroundImage.setImage(new Image(getClass().getResourceAsStream("/com/tubes/assets/background.png")));
@@ -87,8 +91,11 @@ public class GameController {
 
         String type = random.nextBoolean() ? "zombie" : "human";
 
-        // Tentukan lantai
-        String lantai;
+        // Simpan lantai asli
+        trueLantai = originalLantai;
+
+        // Tentukan lantai palsu untuk deskripsi (beda dengan lantai asli jika human)
+        String fakeLantai = originalLantai;
         if ("human".equals(type)) {
             List<String> allLantai = new ArrayList<>();
             for (String[] d : characterData) {
@@ -97,12 +104,12 @@ public class GameController {
                 }
             }
             allLantai.remove(originalLantai);
-            lantai = allLantai.isEmpty() ? originalLantai : allLantai.get(random.nextInt(allLantai.size()));
-        } else {
-            lantai = originalLantai;
+            if (!allLantai.isEmpty()) {
+                fakeLantai = allLantai.get(random.nextInt(allLantai.size()));
+            }
         }
 
-        // Tentukan alias
+        // Tentukan alias nama
         String alias = name;
         if ("human".equals(type) && random.nextBoolean()) {
             List<String> aliases = nameAliases.getOrDefault(name, List.of(name));
@@ -111,26 +118,27 @@ public class GameController {
 
         String finalName = "human".equals(type) ? alias + " (Human)" : name;
 
-        // Bangun ulang deskripsi
+        // Ambil nomor apartemen dari baseDescription
         String noApartemen = baseDescription.split("No\\. Apart ?: ")[1];
-        String finalDescription = "Identitas saya :\n" +
-                "Nama : " + alias + "\n" +
-                "No. Apart : " + noApartemen + "\n" +
-                "Lantai : " + lantai;
 
-        currentCharacter = CharacterFactory.createCharacter(type, finalName, finalDescription, lantai);
+        String finalDescription = "Identitas saya :\n" + '"' +
+                " Halo, Nama saya " + alias + "\n" +
+                "Nomer apart saya " + noApartemen + "\n" +
+                "Saya tinggal di lantai " + fakeLantai + " " + '"';
 
-        // Peluang 30% human pakai gambar zombie asli
+        currentCharacter = CharacterFactory.createCharacter(type, finalName, finalDescription, fakeLantai);
+
+        // Set gambar karakter sesuai ketentuan
         String imagePath;
         if ("human".equals(type)) {
-            boolean useZombieImage = random.nextInt(100) < 70;  // 30% chance
+            boolean useZombieImage = random.nextInt(100) < 70;
             if (useZombieImage) {
-                imagePath = "/com/tubes/assets/" + name + ".png";  // gambar asli zombie
+                imagePath = "/com/tubes/assets/" + name + ".png";
             } else {
-                imagePath = "/com/tubes/assets/dopple" + name + ".png";  // gambar dopple alias
+                imagePath = "/com/tubes/assets/dopple" + name + ".png";
             }
         } else {
-            imagePath = "/com/tubes/assets/" + name + ".png";  // zombie selalu gambar asli
+            imagePath = "/com/tubes/assets/" + name + ".png";
         }
 
         characterImage.setImage(new Image(getClass().getResourceAsStream(imagePath)));
@@ -140,7 +148,6 @@ public class GameController {
 
         characterDescription.setText(finalDescription);
     }
-
 
     private void startCharacterEntranceAnimation() {
         characterImage.setTranslateX(-rootPane.getWidth());
@@ -181,11 +188,29 @@ public class GameController {
     private void showIdCard() {
         idCardImage.setImage(new Image(getClass().getResourceAsStream("/com/tubes/assets/idCard.png")));
 
-        // Ambil nama asli dari data
         String originalName = characterData.get(currentIndex)[0];
         String path = "/com/tubes/assets/" + originalName + ".png";
-
         idCardCharacterImage.setImage(new Image(getClass().getResourceAsStream(path)));
+
+        String desc = currentCharacter.getDescription();
+
+        String nama = "";
+        if (desc.contains("Nama saya ")) {
+            nama = desc.split("Nama saya ")[1].split("\n")[0].trim();
+        }
+
+        String noApart = "";
+        if (desc.contains("apart saya ")) {
+            noApart = desc.split("apart saya ")[1].split("\n")[0].trim();
+        }
+
+        // Gunakan lantai asli yang disimpan di variabel trueLantai
+        String finalDesc = "Nama   : " + nama + "\n" +
+                           "No. Apart : " + noApart + "\n" +
+                           "Lantai : " + trueLantai;
+
+        idCardCharacterDesc.setText(finalDesc);
+
         idCardPane.setVisible(true);
         idCardPane.setManaged(true);
     }
