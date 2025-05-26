@@ -32,14 +32,13 @@ public class GameController {
     @FXML private StackPane idCardPane;
     @FXML private ImageView idCardImage;
     @FXML private ImageView idCardCharacterImage;
-    @FXML private Label idCardCharacterDesc; // <- Tambahan deskripsi di ID Card
+    @FXML private Label idCardCharacterDesc;
 
     private List<String[]> characterData = new ArrayList<>();
     private int currentIndex = 0;
     private Character currentCharacter;
     private Random random = new Random();
 
-    // Alias Map
     private static final Map<String, List<String>> nameAliases = Map.of(
         "Saskia", List.of("Sarah", "Silvy", "Sandra"),
         "Abby", List.of("Adit", "Agung"),
@@ -48,7 +47,8 @@ public class GameController {
         "Timmy", List.of("Toni", "Tatang")
     );
 
-    // Variabel untuk menyimpan lantai asli dari karakter
+    private String currentCharacterType = "";
+
     private String trueLantai = "";
 
     public void initialize() {
@@ -89,19 +89,16 @@ public class GameController {
         String baseDescription = data[1];
         String originalLantai = data[2];
 
+        // Random type assignment
         String type = random.nextBoolean() ? "zombie" : "human";
-
-        // Simpan lantai asli
         trueLantai = originalLantai;
+        currentCharacterType = type;
 
-        // Tentukan lantai palsu untuk deskripsi (beda dengan lantai asli jika human)
         String fakeLantai = originalLantai;
         if ("human".equals(type)) {
             List<String> allLantai = new ArrayList<>();
             for (String[] d : characterData) {
-                if (!allLantai.contains(d[2])) {
-                    allLantai.add(d[2]);
-                }
+                if (!allLantai.contains(d[2])) allLantai.add(d[2]);
             }
             allLantai.remove(originalLantai);
             if (!allLantai.isEmpty()) {
@@ -109,36 +106,50 @@ public class GameController {
             }
         }
 
-        // Tentukan alias nama
+        // Ambiguous alias
         String alias = name;
-        if ("human".equals(type) && random.nextBoolean()) {
+        if (random.nextBoolean()) {
             List<String> aliases = nameAliases.getOrDefault(name, List.of(name));
             alias = aliases.get(random.nextInt(aliases.size()));
         }
 
-        String finalName = "human".equals(type) ? alias + " (Human)" : name;
+        // Ambiguous speech style
+        String[] greetings = {
+            "Halo, saya " + alias,
+            "Hmm... saya rasa nama saya " + alias,
+            "Mereka memanggilku " + alias,
+            "Aku... " + alias + ", ya?",
+            "Namaku... mungkin " + alias
+        };
 
-        // Ambil nomor apartemen dari baseDescription
+        String[] hints = {
+            "Aku tinggal di lantai " + fakeLantai,
+            "Sepertinya aku berasal dari lantai " + fakeLantai,
+            "Tempat tinggalku? Lantai " + fakeLantai + ", kalau tidak salah.",
+            "Lantai " + fakeLantai + "... ya, lantai itu.",
+            "Yang jelas aku bukan dari lantai bawah."
+        };
+
+        String greeting = greetings[random.nextInt(greetings.length)];
+        String hint = hints[random.nextInt(hints.length)];
+
         String noApartemen = baseDescription.split("No\\. Apart ?: ")[1];
 
-        String finalDescription = "Zombie :\n" + '"' +
-                " Halo, Nama saya " + alias + "\n" +
-                "Nomer apart saya " + noApartemen + "\n" +
-                "Saya tinggal di lantai " + fakeLantai + " " + '"';
+        String finalDescription = '"' + greeting + "\n" +
+                                  "Nomor apartemenku " + noApartemen + "\n" +
+                                  hint + '"';
 
-        currentCharacter = CharacterFactory.createCharacter(type, finalName, finalDescription, fakeLantai);
+        currentCharacter = CharacterFactory.createCharacter(type, alias, finalDescription, fakeLantai);
 
-        // Set gambar karakter sesuai ketentuan
+        // Ambiguous image logic
         String imagePath;
-        if ("human".equals(type)) {
-            boolean useZombieImage = random.nextInt(100) < 70;
-            if (useZombieImage) {
-                imagePath = "/com/tubes/assets/" + name + ".png";
-            } else {
-                imagePath = "/com/tubes/assets/dopple" + name + ".png";
-            }
+        int r = random.nextInt(100);
+        if (r < 40) {
+            imagePath = "/com/tubes/assets/" + name + ".png"; // bisa benar
+        } else if (r < 80) {
+            imagePath = "/com/tubes/assets/dopple" + name + ".png"; // bisa menyamar
         } else {
-            imagePath = "/com/tubes/assets/" + name + ".png";
+            imagePath = "/com/tubes/assets/" + name + ".png"; // kembali ke asli
         }
 
         characterImage.setImage(new Image(getClass().getResourceAsStream(imagePath)));
@@ -175,10 +186,7 @@ public class GameController {
         dialogBox.setVisible(false);
         dialogBox.setManaged(false);
         playExitAnimation(() -> {
-            currentIndex++;
-            if (currentIndex >= characterData.size()) {
-                currentIndex = 0;
-            }
+            currentIndex = (currentIndex + 1) % characterData.size();
             loadCurrentCharacter();
             startCharacterEntranceAnimation();
         });
@@ -188,32 +196,26 @@ public class GameController {
     private void showIdCard() {
         idCardImage.setImage(new Image(getClass().getResourceAsStream("/com/tubes/assets/idCard.png")));
 
-        String originalName = characterData.get(currentIndex)[0];
-        String path = "/com/tubes/assets/" + originalName + ".png";
-        idCardCharacterImage.setImage(new Image(getClass().getResourceAsStream(path)));
+        String[] data = characterData.get(currentIndex);
+        String originalName = data[0];
+        String baseDescription = data[1];
+        String originalLantai = data[2];
 
-        String desc = currentCharacter.getDescription();
+        // Ambil data langsung dari string deskripsi asli
+        String nama = baseDescription.split("Nama ?: ")[1].split("\n")[0].trim();
+        String noApart = baseDescription.split("No\\. Apart ?: ")[1].trim();
 
-        String nama = "";
-        if (desc.contains("Nama saya ")) {
-            nama = desc.split("Nama saya ")[1].split("\n")[0].trim();
-        }
+        idCardCharacterImage.setImage(new Image(getClass().getResourceAsStream("/com/tubes/assets/" + originalName + ".png")));
 
-        String noApart = "";
-        if (desc.contains("apart saya ")) {
-            noApart = desc.split("apart saya ")[1].split("\n")[0].trim();
-        }
-
-        // Gunakan lantai asli yang disimpan di variabel trueLantai
         String finalDesc = "Nama   : " + nama + "\n" +
-                           "No. Apart : " + noApart + "\n" +
-                           "Lantai : " + trueLantai;
+                        "No. Apart : " + noApart + "\n" +
+                        "Lantai : " + originalLantai;
 
         idCardCharacterDesc.setText(finalDesc);
-
         idCardPane.setVisible(true);
         idCardPane.setManaged(true);
     }
+
 
     @FXML
     private void closeIdCard() {
