@@ -121,7 +121,7 @@ public class GameController {
         // Ambil nomor apartemen dari baseDescription
         String noApartemen = baseDescription.split("No\\. Apart ?: ")[1];
 
-        String finalDescription = "Identitas saya :\n" + '"' +
+        String finalDescription = "Zombie :\n" + '"' +
                 " Halo, Nama saya " + alias + "\n" +
                 "Nomer apart saya " + noApartemen + "\n" +
                 "Saya tinggal di lantai " + fakeLantai + " " + '"';
