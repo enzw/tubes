@@ -1,7 +1,6 @@
 package com.tubes.controller;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -35,10 +34,18 @@ public class GameController {
     @FXML private ImageView idCardCharacterImage;
 
     private List<String[]> characterData = new ArrayList<>();
-    private Map<String, List<String>> nameAliases = new HashMap<>();
     private int currentIndex = 0;
     private Character currentCharacter;
     private Random random = new Random();
+
+    // Alias Map
+    private static final Map<String, List<String>> nameAliases = Map.of(
+        "Saskia", List.of("Sarah", "Silvy", "Sandra"),
+        "Abby", List.of("Adit", "Agung"),
+        "Wiwok", List.of("Wendy", "Wawan"),
+        "Jhon", List.of("Jimmy", "Joko"),
+        "Timmy", List.of("Toni", "Tatang")
+    );
 
     public void initialize() {
         backgroundImage.setImage(new Image(getClass().getResourceAsStream("/com/tubes/assets/background.png")));
@@ -46,27 +53,16 @@ public class GameController {
 
         backgroundImage.fitWidthProperty().bind(rootPane.widthProperty());
         backgroundImage.fitHeightProperty().bind(rootPane.heightProperty());
-
         counterImage.fitWidthProperty().bind(rootPane.widthProperty());
         counterImage.fitHeightProperty().bind(rootPane.heightProperty());
 
-        // Data karakter: {Nama dasar, Deskripsi dasar, Lantai asli}
         characterData.add(new String[]{"Saskia", "Nama : Saskia Paramether\nNo. Apart : 105-A", "1"});
         characterData.add(new String[]{"Abby", "Nama : Bob Abby\nNo. Apart : 666-F", "3"});
         characterData.add(new String[]{"Wiwok", "Nama : Wiwok Detok\nNo. Apart : 501-O", "2"});
         characterData.add(new String[]{"Jhon", "Nama : Jhon Walker\nNo. Apart : 122-I", "1"});
         characterData.add(new String[]{"Timmy", "Nama : Timmy Tummy\nNo. Apart : 431-A", "2"});
 
-        // Alias nama untuk karakter human
-        nameAliases.put("Saskia", List.of("Sasky", "Saskia P.", "Saskia Paramita", "Sassy"));
-        nameAliases.put("Abby", List.of("Abigail", "Bobby Abby", "A.B.", "Ab"));
-        nameAliases.put("Wiwok", List.of("Wiwoko", "Wiw", "Wiwow", "Wiw Detok"));
-        nameAliases.put("Jhon", List.of("Jhonny", "J. Walker", "Jhon W.", "Jhan"));
-        nameAliases.put("Timmy", List.of("Tim", "T. Tummy", "Timmothy", "Timo"));
-
-        // Pilih karakter awal secara acak
         currentIndex = random.nextInt(characterData.size());
-
         loadCurrentCharacter();
 
         dialogBox.setVisible(false);
@@ -91,6 +87,7 @@ public class GameController {
 
         String type = random.nextBoolean() ? "zombie" : "human";
 
+        // Tentukan lantai
         String lantai;
         if ("human".equals(type)) {
             List<String> allLantai = new ArrayList<>();
@@ -105,34 +102,28 @@ public class GameController {
             lantai = originalLantai;
         }
 
-        // Ambil alias nama jika human
-        String finalName;
-        if ("human".equals(type)) {
-            if (random.nextBoolean()) {
-                // Kadang pakai nama asli
-                finalName = name + " (Human)";
-            } else {
-                // Kadang pakai alias
-                List<String> aliases = nameAliases.getOrDefault(name, List.of(name));
-                String alias = aliases.get(random.nextInt(aliases.size()));
-                finalName = alias + " (Human)";
-            }
-        } else {
-            finalName = name;
+        // Tentukan alias
+        String alias = name;
+        if ("human".equals(type) && random.nextBoolean()) {
+            List<String> aliases = nameAliases.getOrDefault(name, List.of(name));
+            alias = aliases.get(random.nextInt(aliases.size()));
         }
 
+        String finalName = "human".equals(type) ? alias + " (Human)" : name;
 
-        String finalDescription = "==ID CARD==\n" + baseDescription + "\nLantai : " + lantai;
+        // Bangun ulang deskripsi
+        String noApartemen = baseDescription.split("No\\. Apart ?: ")[1];
+        String finalDescription = "Identitas saya :\n" +
+                "Nama : " + alias + "\n" +
+                "No. Apart : " + noApartemen + "\n" +
+                "Lantai : " + lantai;
 
         currentCharacter = CharacterFactory.createCharacter(type, finalName, finalDescription, lantai);
 
-        // Pilih path gambar
-        String imagePath;
-        if ("human".equals(type)) {
-            imagePath = "/com/tubes/assets/dopple" + name + ".png";
-        } else {
-            imagePath = "/com/tubes/assets/" + name + ".png";
-        }
+        // Gambar karakter
+        String imagePath = "human".equals(type)
+            ? "/com/tubes/assets/dopple" + name + ".png"
+            : "/com/tubes/assets/" + name + ".png";
 
         characterImage.setImage(new Image(getClass().getResourceAsStream(imagePath)));
         characterImage.setFitWidth(400);
@@ -148,12 +139,10 @@ public class GameController {
         TranslateTransition tt = new TranslateTransition(Duration.seconds(1.5), characterImage);
         tt.setFromX(-rootPane.getWidth());
         tt.setToX(0);
-
         tt.setOnFinished(e -> {
             dialogBox.setVisible(true);
             dialogBox.setManaged(true);
         });
-
         tt.play();
     }
 
@@ -161,9 +150,7 @@ public class GameController {
         TranslateTransition exit = new TranslateTransition(Duration.seconds(1), characterImage);
         exit.setFromX(0);
         exit.setToX(rootPane.getWidth());
-
         exit.setOnFinished(e -> afterExit.run());
-
         exit.play();
     }
 
@@ -171,13 +158,11 @@ public class GameController {
     private void nextCharacter() {
         dialogBox.setVisible(false);
         dialogBox.setManaged(false);
-
         playExitAnimation(() -> {
             currentIndex++;
             if (currentIndex >= characterData.size()) {
                 currentIndex = 0;
             }
-
             loadCurrentCharacter();
             startCharacterEntranceAnimation();
         });
@@ -187,7 +172,6 @@ public class GameController {
     private void showIdCard() {
         idCardImage.setImage(new Image(getClass().getResourceAsStream("/com/tubes/assets/idCard.png")));
         idCardCharacterImage.setImage(characterImage.getImage());
-
         idCardPane.setVisible(true);
         idCardPane.setManaged(true);
     }
